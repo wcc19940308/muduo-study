@@ -1,5 +1,5 @@
-#include "InetAddress.h"
-#include "TcpStream.h"
+#include "main/InetAddress.h"
+#include "main/TcpStream.h"
 #include <assert.h>
 #include <unistd.h>
 
@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    printf("connecting to %s\n", addr.toIpPort.c_str());
+    printf("connecting to %s\n", addr.toIpPort().c_str());
     TcpStreamPtr stream(TcpStream::connect(addr));
     if (!stream)
     {
@@ -24,6 +24,12 @@ int main(int argc, char* argv[])
         return 0;
     }    
     printf("connected, sending %d bytes\n", len);
+
+    // // 发送数据长度的消息
+    // int32_t length = htonl(len);
+    // stream->sendAll(&length, sizeof(length));
+    // printf("send length = %d message\n", len);
+
     std::string message(len, 'S');
     int nw = stream->sendAll(message.c_str(), message.size());
     printf("send %d bytes\n", nw);
@@ -54,6 +60,7 @@ int main(int argc, char* argv[])
             }
         }
     }
+    // 客户端每次一次性发完，然后一次性收完
     std::vector<char> receive(len);
     int nr = stream->receiveAll(receive.data(), receive.size());
     printf("received %d bytes\n", nr);
